@@ -1,6 +1,7 @@
 package com.dh.win.iaccount;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -9,9 +10,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.util.Log;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.Pair;
+import android.support.v4.view.ViewCompat;
+import android.support.v7.app.AlertDialog;
 import android.view.Gravity;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -22,7 +28,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
+import android.widget.LinearLayout;
 
 import com.dh.win.iaccount.FloatingActionsMenu.FloatingActionsMenu;
 import com.dh.win.iaccount.circleimageview.CircleImageView;
@@ -33,7 +39,9 @@ public class HomepageActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final int FILE_SELECT_CODE = 0;
+    private boolean loginstate = false;
     private CircleImageView touxiang ;
+    private LinearLayout userinfo_dashboard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,10 +54,10 @@ public class HomepageActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        final CoordinatorLayout cdlot = (CoordinatorLayout)findViewById(R.id.maincontent);
+
         FloatingActionsMenu rightLabels = (FloatingActionsMenu) findViewById(R.id.right_labels);
         FloatingActionButton addedOnce = new FloatingActionButton(this);
-        //addedOnce.setTitle("Added once");
-        //rightLabels.addButton(addedOnce);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -62,12 +70,47 @@ public class HomepageActivity extends AppCompatActivity
 
         View headview=navigationView.getHeaderView(0);
         touxiang = (CircleImageView)headview.findViewById(R.id.profile_image);
+        userinfo_dashboard = (LinearLayout) headview.findViewById(R.id.userinfo_dashboard);
+
+        userinfo_dashboard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent =
+                        new Intent(HomepageActivity.this, LoginActivity.class);
+                Pair squareParticipant =
+                        new Pair<>(touxiang, ViewCompat.getTransitionName(touxiang));
+                Pair toolbarParticipants =
+                        new Pair<>(userinfo_dashboard, ViewCompat.getTransitionName(userinfo_dashboard));
+                ActivityOptionsCompat transitionActivityOptions =
+                        ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                HomepageActivity.this, squareParticipant, toolbarParticipants);
+                ActivityCompat.startActivity(
+                        HomepageActivity.this, intent, transitionActivityOptions.toBundle());
+            }
+        });
+
 
         touxiang.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showPopFormBottom(view);
+                if(loginstate == true){
+                    showPopFormBottom(view);
+                }else{
+                    new AlertDialog
+                            .Builder(HomepageActivity.this)
+                            .setTitle("提示")
+                            .setMessage("请先登陆！")
+                            .setPositiveButton("立即登录", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
 
+                                }
+                            })
+                            .setNegativeButton("取消",null)
+                            .create()
+                            .show();
+
+                }
             }
         });
     }
@@ -92,7 +135,7 @@ public class HomepageActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main3, menu);
+        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
